@@ -1,7 +1,5 @@
 import logging
 import os
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from threading import Thread
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -11,21 +9,6 @@ logging.basicConfig(
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
-
-# --- Lightweight health server (for UptimeRobot/Render keep-alive) ---
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"Bot is running!")
-
-
-def start_web_server():
-    """Start a tiny HTTP server so UptimeRobot/Render can ping it."""
-    port = int(os.environ.get("PORT", 8080))
-    server = HTTPServer(("0.0.0.0", port), SimpleHTTPRequestHandler)
-    print(f"Web server running on port {port}")
-    server.serve_forever()
 
 # Constants
 YOUTUBE_URL = "https://youtube.com"
@@ -220,10 +203,6 @@ def main() -> None:
         return
     
     try:
-        # Start health server in background (for UptimeRobot/Render)
-        thread = Thread(target=start_web_server, daemon=True)
-        thread.start()
-
         application = Application.builder().token(TOKEN).post_init(post_init).build()
         
         # Add command handlers
