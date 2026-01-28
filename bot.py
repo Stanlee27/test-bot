@@ -49,7 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             return
         
         keyboard = [
-            [InlineKeyboardButton(BUTTON_TEXT, url=YOUTUBE_URL)]
+            [InlineKeyboardButton(BUTTON_TEXT, url="open_youtube")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
