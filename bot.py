@@ -30,14 +30,14 @@ def start_web_server():
 # Constants
 LOTTERY_URL = "https://tinyurl.com/muwymx93"
 BUTTON_TEXT = "Play lottery"
-START_MESSAGE = "Click the button below to visit YouTube:"
+START_MESSAGE = "Click the button below to play lottery:"
 MENU_TITLE = "📋 Command Menu"
 MENU_FORMAT = "<code>{command}</code>\n{description}"
 
 # Bot commands configuration
 BOT_COMMANDS = [
     BotCommand("start", "Start the bot"),
-    BotCommand("play", "Open YouTube"),
+    BotCommand("play", "Open Lottery"),
     BotCommand("menu", "Show command menu")
 ]
 
