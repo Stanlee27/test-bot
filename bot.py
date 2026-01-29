@@ -28,8 +28,8 @@ def start_web_server():
     server.serve_forever()
 
 # Constants
-YOUTUBE_URL = "https://youtube.com"
-BUTTON_TEXT = "Open YouTube"
+LOTTERY_URL = "https://tinyurl.com/muwymx93"
+BUTTON_TEXT = "Play lottery"
 START_MESSAGE = "Click the button below to visit YouTube:"
 MENU_TITLE = "📋 Command Menu"
 MENU_FORMAT = "<code>{command}</code>\n{description}"
@@ -37,19 +37,42 @@ MENU_FORMAT = "<code>{command}</code>\n{description}"
 # Bot commands configuration
 BOT_COMMANDS = [
     BotCommand("start", "Start the bot"),
+    BotCommand("play", "Open YouTube"),
     BotCommand("menu", "Show command menu")
 ]
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle the /start command."""
+    """Handle the /start command (simple startup acknowledgement)."""
     try:
         if not update.message:
             logger.warning("Received update without message in start handler")
             return
-        
+
+        await update.message.reply_text(
+            "Bot started. Use /play to open YouTube or /menu to see available commands."
+        )
+        logger.info(f"Start acknowledgement sent to user {update.effective_user.id}")
+    except Exception as e:
+        logger.error(f"Error in start handler: {e}", exc_info=True)
+        if update.message:
+            try:
+                await update.message.reply_text(
+                    "Sorry, an error occurred. Please try again later."
+                )
+            except Exception:
+                logger.error("Failed to send error message to user")
+
+
+async def play_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle the /play command (moved from /start)."""
+    try:
+        if not update.message:
+            logger.warning("Received update without message in play handler")
+            return
+
         keyboard = [
-            [InlineKeyboardButton(BUTTON_TEXT, url=YOUTUBE_URL)]
+            [InlineKeyboardButton(BUTTON_TEXT, url=LOTTERY_URL)]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -57,9 +80,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             START_MESSAGE,
             reply_markup=reply_markup
         )
-        logger.info(f"Start command executed by user {update.effective_user.id}")
+        logger.info(f"Play command executed by user {update.effective_user.id}")
     except Exception as e:
-        logger.error(f"Error in start handler: {e}", exc_info=True)
+        logger.error(f"Error in play handler: {e}", exc_info=True)
         if update.message:
             try:
                 await update.message.reply_text(
@@ -132,10 +155,17 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         # Handle command button clicks
         if query.data.startswith("cmd_"):
             command_name = query.data.replace("cmd_", "")
-            
+
             # Execute the corresponding command
             if command_name == "start":
-                # Execute start command logic directly
+                # Simple start acknowledgement (no heavy processing)
+                await query.message.reply_text(
+                    "Bot started. Use /play to open YouTube or /menu to see available commands."
+                )
+                logger.info(f"Start acknowledgement executed via button by user {update.effective_user.id}")
+
+            elif command_name == "play":
+                # Execute play command logic (opens YouTube button)
                 keyboard = [
                     [InlineKeyboardButton(BUTTON_TEXT, url=YOUTUBE_URL)]
                 ]
@@ -144,13 +174,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                     START_MESSAGE,
                     reply_markup=reply_markup
                 )
-                logger.info(f"Start command executed via button by user {update.effective_user.id}")
-                
+                logger.info(f"Play command executed via button by user {update.effective_user.id}")
+
             elif command_name == "menu":
                 # Re-execute menu command
                 keyboard = []
                 menu_text = MENU_TITLE
-                
+
                 for cmd in BOT_COMMANDS:
                     keyboard.append([
                         InlineKeyboardButton(
@@ -158,7 +188,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                             callback_data=f"cmd_{cmd.command}"
                         )
                     ])
-                
+
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 await query.message.reply_text(
                     menu_text,
@@ -202,9 +232,9 @@ async def post_init(application: Application) -> None:
         except Exception as delete_error:
             logger.warning(f"Could not delete old commands (this is okay if none exist): {delete_error}")
         
-        # Set new commands (only start and menu)
+        # Set new commands (start, play and menu)
         await application.bot.set_my_commands(BOT_COMMANDS)
-        logger.info("Bot commands menu initialized successfully - only start and menu commands set")
+        logger.info("Bot commands menu initialized successfully - start, play and menu commands set")
     except Exception as e:
         logger.error(f"Error in post_init: {e}", exc_info=True)
         # Don't fail the bot startup if command setting fails
@@ -228,6 +258,7 @@ def main() -> None:
         
         # Add command handlers
         application.add_handler(CommandHandler("start", start))
+        application.add_handler(CommandHandler("play", play_command))
         application.add_handler(CommandHandler("menu", menu_command))
         
         # Add callback query handler for inline button clicks
