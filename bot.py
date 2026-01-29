@@ -50,7 +50,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             return
 
         await update.message.reply_text(
-            "Bot started. Use /play to open lottery or /menu to see available commands."
+            "Bot started. Use /play to open Lottery or /menu to see available commands."
         )
         logger.info(f"Start acknowledgement sent to user {update.effective_user.id}")
     except Exception as e:
@@ -160,7 +160,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             if command_name == "start":
                 # Simple start acknowledgement (no heavy processing)
                 await query.message.reply_text(
-                    "Bot started. Use /play to open lottery or /menu to see available commands."
+                    "Bot started. Use /play to open Lottery or /menu to see available commands."
                 )
                 logger.info(f"Start acknowledgement executed via button by user {update.effective_user.id}")
 
